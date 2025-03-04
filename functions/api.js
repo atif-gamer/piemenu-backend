@@ -1,12 +1,29 @@
-import express, { Router } from "express";
+import dotenv from "dotenv";
+import ServerlessHttp from "serverless-http";
+import ConnectDb from "../db/db.js";
+import app from "../app.js";
 
-const serverless = require("serverless-http");
+dotenv.config();
 
-const api = express();
+let serverHandler;
 
-const router = Router();
-router.get("/hello", (req, res) => res.send("Hello World!"));
+export const handler = async (event, context) => {
+    if (!serverHandler) {
 
-api.use("/.netlify/functions/api", router);
+        try {
+            await ConnectDb();
+            serverHandler = ServerlessHttp(app);
+            console.log("Database connected successfully");
+        }
+        catch (error) {
+            return {
+                statusCode: 500,
+                body: JSON.stringify({
+                    message: "Error connecting to database",
+                }),
+            }
+        }
+    }
 
-export const handler = serverless(api);
+    return serverHandler(event, context);
+}
