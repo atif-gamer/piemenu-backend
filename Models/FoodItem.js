@@ -16,10 +16,14 @@ const itemSchema = new Schema({
         type: Number,
         required: true
     },
-    storeId: {
+    isAvailable: {
+        type: Boolean,
+        default: true
+    },
+    store: {
         type: Schema.Types.ObjectId,
         ref: "Store"
     }
 }, { timestamps: true });
 
-export default Item = mongoose.model("Item", itemSchema);
+export default FoodItem = mongoose.model("Item", itemSchema);

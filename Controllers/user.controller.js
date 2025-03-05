@@ -1,6 +1,6 @@
 import asyncHandler from '../Utils/asyncHandler.js';
 import ApiError from '../Utils/ApiError.js';
-import User from '../Models/Users.js';
+import User from '../Models/User.js';
 import ApiResponse from '../Utils/ApiResponse.js';
 
 const generateAccessTokenAndRefreshToken = async (userId) => {
@@ -21,12 +21,34 @@ const generateAccessTokenAndRefreshToken = async (userId) => {
     }
 }
 
+const updateUser = asyncHandler(async (req, res) => {
+
+    const { name, email, password, user } = req.body;
+
+    try {
+        const updatedUser = await User.findByIdAndUpdate(user.id, {
+            $set: {
+                name,
+                email,
+                password
+            }
+        }).select("-password -refreshToken");
+
+        if (!updatedUser) throw new ApiError(403, "No user found");
+
+        res.status(200).json(new ApiResponse(200, "User Registered Successfully", updatedUser))
+
+    } catch (error) {
+        return res.status(error.statusCode || 500).json(new ApiError(error.statusCode || 500, error.message || "Somthing Went Wronge."));
+    }
+})
+
 const registerUser = asyncHandler(async (req, res) => {
 
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
-        throw new ApiError(400, "All fields are required.");
+        return new ApiError(400, "All fields are required.");
     }
 
     try {
@@ -68,7 +90,7 @@ const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-        throw new ApiError(400, "All fields are required.");
+        return new ApiError(400, "All fields are required.");
     }
 
     try {
@@ -92,4 +114,4 @@ const loginUser = asyncHandler(async (req, res) => {
 
 // Forgot password
 
-export { registerUser, loginUser }
+export { registerUser, updateUser, loginUser }

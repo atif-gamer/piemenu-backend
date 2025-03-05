@@ -1,6 +1,10 @@
 import mongoose, { Schema } from "mongoose";
 
 const storeSchema = new Schema({
+    storeId: {
+        type: Number,
+        required
+    },
     name: {
         type: String,
         required: true
@@ -15,6 +19,10 @@ const storeSchema = new Schema({
     contact: {
         type: String,
         required: true
+    },
+    isActive: {
+        type: Boolean,
+        default: true,
     },
     owner: {
         type: Schema.Types.ObjectId,
