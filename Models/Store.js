@@ -3,7 +3,8 @@ import mongoose, { Schema } from "mongoose";
 const storeSchema = new Schema({
     storeId: {
         type: Number,
-        required
+        required: true,
+        unique: true,
     },
     name: {
         type: String,
@@ -11,6 +12,7 @@ const storeSchema = new Schema({
     },
     coverImage: {
         type: String,
+        default: ""
     },
     address: {
         type: String,

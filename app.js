@@ -13,8 +13,8 @@ app.use(express.json({ limit: '16kb' }));
 app.use(cookieParser());
 
 app.use("/.netlify/functions/api/v1/user", userRouter);
-app.use("/.netlify/functions/api/v1/store/:storeId/fooditem", foodItemRouter);
-app.use("/.netlify/functions/api/v1/store", storeRouter);
+app.use("/.netlify/functions/api/v1/store", storeRouter); // test stores owenership
+// app.use("/.netlify/functions/api/v1/fooditem", foodItemRouter);
 
 
 export default app;

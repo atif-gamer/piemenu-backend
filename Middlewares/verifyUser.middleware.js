@@ -5,24 +5,23 @@ import ApiError from "../Utils/ApiError";
 
 const verifyUser = asyncHandler(async (req, res, next) => {
 
-    const token = req.cookies?.accessToken || req.header("Authorization")
-    if (!token) throw new ApiError(401, "Unauthorized Request");
+    const accessToken = req.cookies?.accessToken || req.header("Authorization")
+    if (!accessToken) throw new ApiError(401, "Unauthorized Request");
 
-    const decodedToken = jwt.decode(token, JWT_ACCESS_SECRET);
+    const decodedToken = jwt.decode(accessToken, process.env.JWT_ACCESS_SECRET);
 
     try {
-        const user = User.findById(decodedToken?._id)
+        const user = await User.findById(decodedToken?._id).select("-password -refreshToken")
 
         if (!user) throw new ApiError(401, "Unauthorized Request");
 
-        res.user = user;
+        req.user = user;
 
         next();
 
     } catch (error) {
-        throw new ApiError(error.statusCode || 500).json(new ApiError(error.statusCode || 500, error.message || "Somthing Went Wronge."))
+        throw new ApiError(error.statusCode || 500, error.message || "Somthing Went Wronge.")
     }
-
 });
 
 export default verifyUser;
