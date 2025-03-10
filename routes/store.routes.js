@@ -2,17 +2,11 @@ import { createStore, getUserStores, getStoreById, updateStore, viewStore } from
 import { Router } from "express"
 import verifyUser from "../Middlewares/verifyUser.middleware.js"
 import verifyStore from "../Middlewares/verifyStore.middleware.js";
-import ApiError from '../Utils/ApiError.js';
+import validateId from "../Middlewares/validateId.middleware.js";
 
 const router = Router();
 
-router.param("storeId", (req, res, next, value) => {
-
-    if (!Number(value))
-        throw new ApiError(400, "Id is incorrect");
-    else
-        next();
-})
+router.param("storeId", validateId);
 
 router.route('/:storeId').get(viewStore); // for viewers
 

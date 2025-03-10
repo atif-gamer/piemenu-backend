@@ -1,12 +1,14 @@
-import { createItem, updateItem, deleteItem, } from "../Controllers/fooditem.controller"
+import { createItem, updateItem, deleteItem, getStoreItems } from "../Controllers/fooditem.controller"
 import { Router } from "express"
 import verifyUser from "../Middlewares/verifyUser.middleware";
 import verifyStore from "../Middlewares/verifyStore.middleware";
+import validateId from "../Middlewares/validateId.middleware";
 
-const router = Router()
+const router = Router({ mergeParams: true });
 
 router.use(verifyUser, verifyStore);
 
+router.route('/').get(getStoreItems).post(createItem);
 router.route('/').post(createItem);
 router.route('/:itemId').patch(updateItem).delete(deleteItem);
 
