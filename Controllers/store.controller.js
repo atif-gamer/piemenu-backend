@@ -7,7 +7,7 @@ const createStore = asyncHandler(async (req, res) => {
     const user = req.user;
     const { name, converImage, address, contact } = req.body;
 
-    if (!name || !address || !contact) throw new ApiError(209, "All fields required");
+    if (!name || !address || !contact) throw new ApiError(400, "All fields required");
 
     const storeId = Date.now();
 
