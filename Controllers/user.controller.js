@@ -32,7 +32,7 @@ const registerUser = asyncHandler(async (req, res) => {
     try {
         const user = await User.findOne({ email });
         if (user) {
-            throw new ApiError(403, "User already exists with this email.");
+            throw new ApiError(409, "User already exists with this email.");
         }
 
         // add tokens
@@ -48,7 +48,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
         await newUser.save({ validateBeforeSave: false });
 
-        if (!newUser) throw new ApiError(403, "User already exists with this email.");
+        if (!newUser) throw new ApiError(500, "Somthing Went Wronge.");
 
         res.status(200).json(new ApiResponse(200, "User Registered Successfully", {
             name,
@@ -59,7 +59,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        throw new ApiError(error.statusCode || 500).json(new ApiError(error.statusCode || 500, error.message || "Somthing Went Wronge."));
+        throw new ApiError(error.statusCode || 500, error.message || "Somthing Went Wronge.");
     }
 })
 
@@ -74,7 +74,7 @@ const loginUser = asyncHandler(async (req, res) => {
     try {
         const user = await User.findOne({ email });
 
-        if (!user) throw new ApiError(401, "No User is registered with the eamil")
+        if (!user) throw new ApiError(404, "No User is registered with the eamil")
 
         const isPasswordCorrect = await user.isPasswordCorrect(password);
 

@@ -8,8 +8,8 @@ const router = Router({ mergeParams: true });
 
 router.use(verifyUser, verifyStore);
 
-router.route('/').get(getStoreItems).post(createItem);
-router.route('/').post(createItem);
+router.route('/').post(getStoreItems).post(createItem);
+router.route('/create').post(createItem);
 router.route('/:itemId').patch(updateItem).delete(deleteItem);
 
 export default router

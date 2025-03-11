@@ -17,7 +17,7 @@ app.param("storeId", validateId);
 
 app.use("/.netlify/functions/api/v1/user", userRouter);
 app.use("/.netlify/functions/api/v1/store", storeRouter); // test stores owenership
-app.use("/.netlify/functions/api/v1/store/:storeId/item", foodItemRouter);
+app.use("/.netlify/functions/api/v1/store/:storeId/items", foodItemRouter);
 
 
 export default app;

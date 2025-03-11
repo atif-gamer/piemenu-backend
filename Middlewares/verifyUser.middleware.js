@@ -5,7 +5,7 @@ import ApiError from "../Utils/ApiError";
 
 const verifyUser = asyncHandler(async (req, res, next) => {
 
-    const accessToken = req.cookies?.accessToken || req.header("Authorization").replace("Bearer ", "");
+    const accessToken = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "");
     if (!accessToken) throw new ApiError(401, "Unauthorized Request");
 
     const decodedToken = jwt.decode(accessToken, process.env.JWT_ACCESS_SECRET);
