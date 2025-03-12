@@ -1,9 +1,6 @@
-import dotenv from "dotenv";
 import ServerlessHttp from "serverless-http";
 import ConnectDb from "../db/db.js";
 import app from "../app.js";
-
-dotenv.config();
 
 let serverHandler;
 

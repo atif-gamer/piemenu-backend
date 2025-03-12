@@ -63,15 +63,10 @@ const getUserStores = asyncHandler(async (req, res) => {
 
         const stores = await Store.find({ owner: user.id })
 
-        console.log(stores);
-
         // If no store
         // if(!stores.length) return new ApiError(404, "No stores found");
 
-        res.status(200).json(new ApiResponse(200, "Store fetched successfully", {
-            stores
-        }))
-
+        res.status(200).json(new ApiResponse(200, "Store fetched successfully", stores))
 
     } catch (error) {
         throw new ApiError(error.statusCode || 500).json(new ApiError(error.statusCode || 500, error.message || "Somthing Went Wronge."))

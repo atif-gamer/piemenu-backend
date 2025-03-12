@@ -65,6 +65,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
 
+
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -86,8 +87,8 @@ const loginUser = asyncHandler(async (req, res) => {
 
         const cookieOptions = {
             httpOnly: true,
-            secure: true
-        }
+            secure: true,
+        };
 
         res.status(200)
             .cookie("accessToken", accessToken, cookieOptions)
@@ -147,6 +148,33 @@ const updateUser = asyncHandler(async (req, res) => {
     }
 })
 
+const logoutUser = asyncHandler(async (req, res) => {
+
+    const user = req.user;
+
+    if (!user) throw new ApiError(403, "Unauthorized Request");
+
+    try {
+        const userInDb = await User.findById(user.id).select("-password");
+
+        if (!userInDb) throw new ApiError(404, "No user found");
+
+        userInDb.refreshToken = "";
+
+        const logedOutUser = await userInDb.save({ validateBeforeSave: false });
+
+        if (!logedOutUser) throw new ApiError(500, "Somthing went wrong!");
+
+        res.status(200)
+            .clearCookie("accessToken")
+            .clearCookie("refreshToken")
+            .json(new ApiResponse(200, "User Logged Out Successfully", {}))
+
+    } catch (error) {
+        throw new ApiError(error.statusCode || 500, error.message || "Somthing Went Wronge.");
+    }
+})
+
 // Forgot password
 
-export { registerUser, changePassword, updateUser, loginUser }
+export { registerUser, changePassword, updateUser, loginUser, logoutUser }
