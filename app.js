@@ -21,9 +21,9 @@ app.get("/.netlify/functions/api/v1", (req, res) => {
     res.send("App is running");
 })
 
-app.use("/.netlify/functions/api/v1/user", userRouter);
-app.use("/.netlify/functions/api/v1/store", storeRouter); // test stores owenership
-app.use("/.netlify/functions/api/v1/store/:storeId/items", foodItemRouter);
+// app.use("/.netlify/functions/api/v1/user", userRouter);
+//app.use("/.netlify/functions/api/v1/store", storeRouter); // test stores owenership
+//app.use("/.netlify/functions/api/v1/store/:storeId/items", foodItemRouter);
 
 
 export default app;
