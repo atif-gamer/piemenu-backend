@@ -17,7 +17,9 @@ app.use(express.json({ limit: '16kb' }));
 app.use(cookieParser());
 
 app.param("storeId", validateId);
-
+app.get("/.netlify/functions/api/v1", (req, res) => {
+    res.send("App is running");
+})
 
 app.use("/.netlify/functions/api/v1/user", userRouter);
 app.use("/.netlify/functions/api/v1/store", storeRouter); // test stores owenership
