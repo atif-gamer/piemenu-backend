@@ -1,8 +1,8 @@
-import { createItem, updateItem, deleteItem, getStoreItems } from "../Controllers/fooditem.controller"
+import { createItem, updateItem, deleteItem, getStoreItems } from "../Controllers/fooditem.controller.js"
 import { Router } from "express"
-import verifyUser from "../Middlewares/verifyUser.middleware";
-import verifyStore from "../Middlewares/verifyStore.middleware";
-import validateId from "../Middlewares/validateId.middleware";
+import verifyUser from "../Middlewares/verifyUser.middleware.js";
+import verifyStore from "../Middlewares/verifyStore.middleware.js";
+import validateId from "../Middlewares/validateId.middleware.js";
 
 const router = Router({ mergeParams: true });
 

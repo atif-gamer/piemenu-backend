@@ -1,6 +1,6 @@
 import express, { urlencoded } from "express";
 import cors from 'cors'
-import userRouter from "./routes/user.routes";
+import userRouter from "./routes/user.routes.js";
 import storeRouter from "./routes/store.routes.js"
 import foodItemRouter from "./routes/fooditem.routes.js"
 import cookieParser from "cookie-parser";
@@ -17,13 +17,13 @@ app.use(express.json({ limit: '16kb' }));
 app.use(cookieParser());
 
 app.param("storeId", validateId);
-app.get("/.netlify/functions/api/v1", (req, res) => {
+app.get("/api/v1", (req, res) => {
     res.send("App is running");
 })
 
-app.use("/.netlify/functions/api/v1/user", userRouter);
-app.use("/.netlify/functions/api/v1/store", storeRouter); // test stores owenership
-app.use("/.netlify/functions/api/v1/store/:storeId/items", foodItemRouter);
+app.use("/api/v1/user", userRouter);
+app.use("/api/v1/store", storeRouter); // test stores owenership
+app.use("/api/v1/store/:storeId/items", foodItemRouter);
 
 
 export default app;

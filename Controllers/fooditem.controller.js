@@ -1,8 +1,8 @@
-import ApiError from "../Utils/ApiError";
-import asyncHandler from "../Utils/asyncHandler"
-import FoodItem from "../Models/FoodItem";
-import ApiResponse from "../Utils/ApiResponse";
-import Store from "../Models/Store";
+import ApiError from "../Utils/ApiError.js";
+import asyncHandler from "../Utils/asyncHandler.js"
+import { FoodItem } from "../Models/FoodItem.js";
+import ApiResponse from "../Utils/ApiResponse.js";
+import { Store } from "../Models/Store.js";
 
 const getStoreItems = asyncHandler(async (req, res) => {
 

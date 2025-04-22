@@ -1,6 +1,6 @@
 import asyncHandler from '../Utils/asyncHandler.js';
 import ApiError from '../Utils/ApiError.js';
-import User from '../Models/User.js';
+import { User } from '../Models/User.js';
 import ApiResponse from '../Utils/ApiResponse.js';
 
 console.log('typeof asyncHandler:', typeof asyncHandler);

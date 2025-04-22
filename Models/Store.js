@@ -32,4 +32,4 @@ const storeSchema = new Schema({
     }
 }, { timeseries: true });
 
-export default Store = mongoose.model("Store", storeSchema);
+export const Store = mongoose.model("Store", storeSchema);

@@ -1,7 +1,7 @@
-import ApiError from "../Utils/ApiError";
-import asyncHandler from "../Utils/asyncHandler";
-import Store from "../Models/Store";
-import ApiResponse from "../Utils/ApiResponse";
+import ApiError from "../Utils/ApiError.js";
+import asyncHandler from "../Utils/asyncHandler.js";
+import { Store } from "../Models/Store.js";
+import ApiResponse from "../Utils/ApiResponse.js";
 
 const createStore = asyncHandler(async (req, res) => {
     const user = req.user;

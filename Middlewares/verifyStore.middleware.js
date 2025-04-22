@@ -1,6 +1,6 @@
-import asyncHandler from "../Utils/asyncHandler";
-import ApiError from "../Utils/ApiError";
-import Store from "../Models/Store";
+import asyncHandler from "../Utils/asyncHandler.js";
+import ApiError from "../Utils/ApiError.js";
+import { Store } from "../Models/Store.js";
 
 const verifyStore = asyncHandler(async (req, res, next) => {
 
