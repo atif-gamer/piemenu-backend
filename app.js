@@ -17,7 +17,7 @@ app.use(express.json({ limit: '16kb' }));
 app.use(cookieParser());
 
 app.param("storeId", validateId);
-app.get("/api/v1", (req, res) => {
+app.get("/", (req, res) => {
     res.send("App is running");
 })
 
