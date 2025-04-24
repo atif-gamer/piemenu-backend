@@ -8,7 +8,7 @@ const router = Router({ mergeParams: true });
 
 router.use(verifyUser, verifyStore);
 
-router.route('/').post(getStoreItems).post(createItem);
+router.route('/').post(getStoreItems);
 router.route('/create').post(createItem);
 router.route('/:itemId').patch(updateItem).delete(deleteItem);
 
