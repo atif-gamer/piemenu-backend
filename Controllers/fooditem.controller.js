@@ -24,12 +24,20 @@ const getStoreItems = asyncHandler(async (req, res) => {
 })
 
 const createItem = asyncHandler(async (req, res) => {
+
+    // const imageFile = req.files['image']?.[0];
+
+
     const store = req.store;
     const { name, imageUrl = "", description, price, category } = req.body;
 
     if (!name || !description || !price) throw new ApiError(400, "All Fields required");
 
     try {
+
+        // Cloudinary 
+        // const uploadResponse = await uploadImageToCloudinary(imageFile);
+        // if (uploadResponse?.error) throw new ApiError(500, "Something went wronge.");
 
         const newFoodItem = await FoodItem.create({
             name,
@@ -74,8 +82,16 @@ const updateItem = asyncHandler(async (req, res) => {
 const deleteItem = asyncHandler(async (req, res) => {
 
     const { itemId } = req.params;
+    // const imageFile = req.files['image']?.[0];
 
     try {
+
+        // Image
+        // const imageResponse = await deleteImgFromCloudinary(cardToUpdate.image);
+        // if (!imageResponse?.success) throw new ApiError(500, "Something went wronge.");
+
+        // const uploadResponse = await uploadImageToCloudinary(imageFile);
+        // if (uploadResponse?.error) throw new ApiError(500, "Something went wronge.");
 
         const deletedItem = await FoodItem.findByIdAndDelete(itemId);
 
