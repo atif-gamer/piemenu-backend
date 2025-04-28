@@ -2,6 +2,7 @@ import ApiError from "../Utils/ApiError.js";
 import asyncHandler from "../Utils/asyncHandler.js";
 import { Store } from "../Models/Store.js";
 import ApiResponse from "../Utils/ApiResponse.js";
+import { FoodItem } from "../Models/FoodItem.js";
 
 const createStore = asyncHandler(async (req, res) => {
     const user = req.user;
@@ -91,18 +92,53 @@ const getStoreById = asyncHandler(async (req, res) => {
 })
 
 const viewStore = asyncHandler(async (req, res) => {
-    const { storeId } = req.params;
+    let { storeId } = req.params;
+    storeId = parseInt(req.params.storeId);
 
     try {
-        const store = await Store.find({ storeId })
+        const storeWithItems = await Store.aggregate([
+            { $match: { storeId, isActive: true }}, // Match using custom storeId (a Number type)
+            {
+                $project: {
+                    __v: 0,
+                    isActive: 0,
+                    owner: 0
+                }
+            },
+            {
+                $lookup: {
+                    from: "items", // This matches your model name "Item" -> "items" collection
+                    let: { storeObjectId: "$_id" }, // Store the _id for use in the pipeline
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: { $eq: ["$store", "$$storeObjectId"] }, // Match items where store field equals the store's _id
+                                isAvailable: true
+                            }
+                        },
+                        {
+                            $project: {
+                                name: 1,
+                                description: 1,
+                                imageUrl: 1,
+                                price: 1
+                            }
+                        }
+                    ],
+                    as: "foodItems"
+                }
+            },
+            { $limit: 1 }
+        ]);
 
-        if (!store) throw new ApiError(404, "No store found");
+        if (!storeWithItems.length) throw new ApiError(404, "No store found");
 
-        res.status(200).json(new ApiResponse(200, "Store fetched successfully", store));
+        res.status(200).json(new ApiResponse(200, "Store fetched successfully", { store:  storeWithItems[0] }));
     } catch (error) {
-        throw new ApiError(error.statusCode || 500).json(new ApiError(error.statusCode || 500, error.message || "Somthing Went Wronge."))
+        throw new ApiError(error.statusCode || 500, error.message || "Somthing Went Wronge.")
     }
-})
+});
+
 
 export {
     createStore,

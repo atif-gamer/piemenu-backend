@@ -3,6 +3,7 @@ import asyncHandler from "../Utils/asyncHandler.js"
 import { FoodItem } from "../Models/FoodItem.js";
 import ApiResponse from "../Utils/ApiResponse.js";
 import { Store } from "../Models/Store.js";
+import { uploadImageToCloudinary } from "../Utils/Cloudinary.js";
 
 const getStoreItems = asyncHandler(async (req, res) => {
 
@@ -25,19 +26,25 @@ const getStoreItems = asyncHandler(async (req, res) => {
 
 const createItem = asyncHandler(async (req, res) => {
 
-    // const imageFile = req.files['image']?.[0];
-
+    const imageFile = req.file;
+    console.log(imageFile);
 
     const store = req.store;
-    const { name, imageUrl = "", description, price, category } = req.body;
+    const { name, description, price, category } = req.body;
 
     if (!name || !description || !price) throw new ApiError(400, "All Fields required");
 
     try {
 
         // Cloudinary 
-        // const uploadResponse = await uploadImageToCloudinary(imageFile);
-        // if (uploadResponse?.error) throw new ApiError(500, "Something went wronge.");
+        let imageUrl = ''; //set a placeholder url
+        if(imageFile)
+        {
+            const uploadResponse = await uploadImageToCloudinary(imageFile);
+            console.log(uploadResponse);
+            imageUrl = uploadResponse.secure_url;
+            if (uploadResponse?.error) throw new ApiError(500, "Something went wronge.");
+        }
 
         const newFoodItem = await FoodItem.create({
             name,
