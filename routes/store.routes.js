@@ -7,7 +7,7 @@ import validateId from "../Middlewares/validateId.middleware.js";
 const router = Router();
 
 router.param("storeId", validateId);
-
+ 
 router.route('/:storeId').get(viewStore); // for viewers
 
 router.use(verifyUser);

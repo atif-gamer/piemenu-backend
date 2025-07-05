@@ -1,7 +1,9 @@
 import asyncHandler from '../Utils/asyncHandler.js';
 import ApiError from '../Utils/ApiError.js';
-import { User } from '../Models/User.js';
 import ApiResponse from '../Utils/ApiResponse.js';
+import { User } from '../Models/User.js';
+import { Store } from '../Models/Store.js';
+import jwt from 'jsonwebtoken';
 
 const generateAccessTokenAndRefreshToken = async (userId) => {
     try {
@@ -62,6 +64,53 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(error.statusCode || 500, error.message || "Somthing Went Wronge.");
     }
 })
+
+const refreshAccessToken = asyncHandler(async (req, res) => {
+
+    const storeId = req.params.storeId;
+    const refreshToken = req.cookies?.refreshToken || req.header("Authorization")?.replace("Bearer ", "");
+
+    if (!refreshToken) throw new ApiError(401, "Unauthorized Request");
+
+    const decodedToken = jwt.decode(refreshToken, process.env.JWT_REFRESH_SECRET);
+
+    try {
+
+        const user = await User.findById(decodedToken?._id).select("-password -refreshToken")
+
+        if (!user) throw new ApiError(401, "Unauthorized Request");
+
+        const { accessToken, refreshToken } = await generateAccessTokenAndRefreshToken(user.id);
+
+        let store = null;
+
+        if (storeId) {
+            store = await Store.findOne({storeId});
+            if (store.owner.toString() !== user.id.toString()) store = null;
+            if (!store) store = null;
+        }
+
+        user.password = undefined;
+
+        const cookieOptions = {
+            httpOnly: true,  // Ensures cookies are only accessible by the server
+            secure: true,    // Ensures cookies are sent over HTTPS
+            sameSite: "none" // Allows cookies to be sent from different origins (important for frontend-backend communication)
+        };
+
+        res.status(200)
+            .cookie("accessToken", accessToken, cookieOptions)
+            .cookie("refreshToken", refreshToken, cookieOptions)
+            .json(new ApiResponse(200, "User Registered Successfully", {
+                user,
+                store
+            }))
+    }
+    catch (error) {
+        throw new ApiError(error.statusCode || 500, error.message || "Somthing Went Wronge.");
+    }
+})
+
 
 const loginUser = asyncHandler(async (req, res) => {
 
@@ -178,4 +227,4 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 // Forgot password
 
-export { registerUser, changePassword, updateUser, loginUser, logoutUser }
+export { registerUser, changePassword, updateUser, loginUser, logoutUser, refreshAccessToken }

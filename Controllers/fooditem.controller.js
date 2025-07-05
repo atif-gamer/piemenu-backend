@@ -38,8 +38,7 @@ const createItem = asyncHandler(async (req, res) => {
 
         // Cloudinary 
         let imageUrl = ''; //set a placeholder url
-        if(imageFile)
-        {
+        if (imageFile) {
             const uploadResponse = await uploadImageToCloudinary(imageFile);
             console.log(uploadResponse);
             imageUrl = uploadResponse.secure_url;
@@ -67,7 +66,10 @@ const updateItem = asyncHandler(async (req, res) => {
 
     const { itemId } = req.params;
 
-    const fieldsToUpdate = { name, description, price, category, isAvailable } = req.body;
+    const fieldsToUpdate = req.body;
+
+    console.log(itemId);
+    console.log(fieldsToUpdate);
 
     if (!Object.keys(fieldsToUpdate).length) throw new ApiError(400, "Nothing to update");
 

@@ -11,6 +11,6 @@ router.use(verifyUser, verifyStore);
 
 router.route('/').post(getStoreItems);
 router.route('/create').post(upload.single('image'), createItem);
-router.route('/:itemId').patch(updateItem).delete(deleteItem);
+router.route('/:itemId').patch(upload.single('image'), updateItem).delete(deleteItem);
 
 export default router
