@@ -2,7 +2,8 @@ import ApiError from "../Utils/ApiError.js";
 import asyncHandler from "../Utils/asyncHandler.js";
 import { Store } from "../Models/Store.js";
 import ApiResponse from "../Utils/ApiResponse.js";
-import { FoodItem } from "../Models/FoodItem.js";
+
+
 
 const createStore = asyncHandler(async (req, res) => {
     const user = req.user;
@@ -97,7 +98,7 @@ const viewStore = asyncHandler(async (req, res) => {
 
     try {
         const storeWithItems = await Store.aggregate([
-            { $match: { storeId, isActive: true }}, // Match using custom storeId (a Number type)
+            { $match: { storeId, isActive: true } }, // Match using custom storeId (a Number type)
             {
                 $project: {
                     __v: 0,
@@ -133,11 +134,55 @@ const viewStore = asyncHandler(async (req, res) => {
 
         if (!storeWithItems.length) throw new ApiError(404, "No store found");
 
-        res.status(200).json(new ApiResponse(200, "Store fetched successfully", { store:  storeWithItems[0] }));
+        res.status(200).json(new ApiResponse(200, "Store fetched successfully", { store: storeWithItems[0] }));
     } catch (error) {
         throw new ApiError(error.statusCode || 500, error.message || "Somthing Went Wronge.")
     }
 });
+
+const closeStore = asyncHandler(async (req, res) => {
+    const store = req.store;
+
+    try {
+        if (!store) throw new ApiError(404, "Store not found");
+
+        // Check if store is already closed
+        if (!store.isActive) throw new ApiError(400, "Store is already closed");
+
+        const closedStore = await Store.findByIdAndUpdate(store.id, {
+            $set: { isActive: false }
+        }, { new: true });
+
+        if (!closedStore) throw new ApiError(500, "Something went wrong");
+
+        res.status(200).json(new ApiResponse(200, "Store closed successfully", closedStore));
+
+    } catch (error) {
+        throw new ApiError(error.statusCode || 500, error.message || "Something went wrong");
+    }
+});
+
+const reopenStore = asyncHandler(async (req, res) => {
+    const store = req.store;
+
+    try {
+        if (!store) throw new ApiError(404, "Store not found");
+
+        if (store.isActive) throw new ApiError(400, "Store is already active");
+
+        const reopenedStore = await Store.findByIdAndUpdate(store.id, {
+            $set: { isActive: true }
+        }, { new: true });
+
+        if (!reopenedStore) throw new ApiError(500, "Something went wrong");
+
+        res.status(200).json(new ApiResponse(200, "Store reopened successfully", reopenedStore));
+
+    } catch (error) {
+        throw new ApiError(error.statusCode || 500, error.message || "Something went wrong");
+    }
+})
+
 
 
 export {
@@ -145,5 +190,7 @@ export {
     updateStore,
     getUserStores,
     getStoreById,
-    viewStore
+    viewStore,
+    closeStore,
+    reopenStore,
 }

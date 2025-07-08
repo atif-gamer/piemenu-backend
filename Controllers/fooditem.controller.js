@@ -4,6 +4,8 @@ import { FoodItem } from "../Models/FoodItem.js";
 import ApiResponse from "../Utils/ApiResponse.js";
 import { Store } from "../Models/Store.js";
 import { uploadImageToCloudinary } from "../Utils/Cloudinary.js";
+import fs from 'fs';
+import OpenAI from "openai";
 
 const getStoreItems = asyncHandler(async (req, res) => {
 
@@ -115,9 +117,49 @@ const deleteItem = asyncHandler(async (req, res) => {
     }
 })
 
+const extractMenuItems = asyncHandler(async (req, res) => {
+    // console.log(req.file);
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: "No file uploaded" });
+        }
+
+        // Read file content
+        const filePath = req.file.path;
+        console.log(filePath);
+        const fileContent = await fs.promises.readFile(filePath, 'utf-8');
+
+        // Prepare prompt for OpenAI
+        const prompt = `Extract a list of dish names from the following restaurant menu text. 
+            Only return the dish names as a JSON array.Menu:${fileContent}`;
+
+        // Call OpenAI API
+        const client = new OpenAI();
+
+        const response = await client.responses.create({
+            model: "gpt-4.1",
+            input: prompt,
+        });
+
+        console.log(response);
+
+        // Parse response
+        const dishes = JSON.parse(response.output_text);
+
+        // Clean up uploaded file
+        fs.unlink(filePath, () => { });
+
+        res.status(200).json(new ApiResponse(200, "Menu items extracted successfully", dishes));
+    } catch (error) {
+        console.error(error);
+        throw new ApiError(500, "Failed to extract menu items");
+    }
+});
+
 export {
     getStoreItems,
     createItem,
     updateItem,
     deleteItem,
+    extractMenuItems
 }

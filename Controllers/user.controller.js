@@ -82,13 +82,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
         const { accessToken, refreshToken } = await generateAccessTokenAndRefreshToken(user.id);
 
-        let store = null;
-
-        if (storeId) {
-            store = await Store.findOne({storeId});
-            if (store.owner.toString() !== user.id.toString()) store = null;
-            if (!store) store = null;
-        }
+        const stores = await Store.find({owner: user.id}).select("-owner");
 
         user.password = undefined;
 
@@ -103,7 +97,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
             .cookie("refreshToken", refreshToken, cookieOptions)
             .json(new ApiResponse(200, "User Registered Successfully", {
                 user,
-                store
+                stores
             }))
     }
     catch (error) {
