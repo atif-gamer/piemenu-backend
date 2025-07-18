@@ -2,6 +2,7 @@ import ApiError from "../Utils/ApiError.js";
 import asyncHandler from "../Utils/asyncHandler.js";
 import { Store } from "../Models/Store.js";
 import ApiResponse from "../Utils/ApiResponse.js";
+import { deleteImgFromCloudinary, uploadImageToCloudinary } from "../Utils/Cloudinary.js";
 
 
 
@@ -37,10 +38,31 @@ const updateStore = asyncHandler(async (req, res) => {
 
     const store = req.store;
     const fieldsToUpdate = req.body;
+    const coverImage = req.file;
 
-    if (!Object.keys(fieldsToUpdate).length) throw new ApiError(400, "Nothing to update");
+    console.log(fieldsToUpdate, "fieldsToUpdate")
+    console.log(coverImage, "Cover Image")
+
+    if (!Object.keys(fieldsToUpdate).length && !coverImage) throw new ApiError(400, "Nothing to update");
 
     try {
+
+        if (coverImage) {
+            // Uploading file to cloudinary
+            try {
+                // delete old cover image from cloudinary
+                if (store.coverImage) {
+                    await deleteImgFromCloudinary(store.coverImage);
+                    console.log("Old cover image deleted from cloudinary");
+                }
+
+                const result = await uploadImageToCloudinary(coverImage);
+                console.log("Cover image uploaded to cloudinary");
+                fieldsToUpdate.coverImage = result.secure_url;
+            } catch (err) {
+                throw new ApiError(500, "Failed to upload image to Cloudinary");
+            }
+        }
 
         const updatedStore = await Store.findByIdAndUpdate(store.id, {
             $set: { ...fieldsToUpdate }
@@ -48,7 +70,7 @@ const updateStore = asyncHandler(async (req, res) => {
 
         if (!updatedStore) throw new ApiError(500, "Something went wronge");
 
-        return res.status(200).json(new ApiResponse(209, "Store Created Successfully", updatedStore));
+        return res.status(200).json(new ApiResponse(200, "Store Updated Successfully", updatedStore));
 
     } catch (error) {
         throw new ApiError(error.statusCode || 500).json(new ApiError(error.statusCode || 500, error.message || "Somthing Went Wronge."))

@@ -20,6 +20,12 @@ const itemSchema = new Schema({
         type: Boolean,
         default: true
     },
+    category: {
+        type: String,
+    },
+    collection: {
+        type: String,
+    },
     store: {
         type: Schema.Types.ObjectId,
         ref: "Store"

@@ -29,7 +29,6 @@ const getStoreItems = asyncHandler(async (req, res) => {
 const createItem = asyncHandler(async (req, res) => {
 
     const imageFile = req.file;
-    console.log(imageFile);
 
     const store = req.store;
     const { name, description, price, category } = req.body;
@@ -119,26 +118,38 @@ const deleteItem = asyncHandler(async (req, res) => {
 
 const extractMenuItems = asyncHandler(async (req, res) => {
     // console.log(req.file);
+
+    const imagePath = req.file.path;
+
+    if (!imagePath) throw new ApiError(400, "No image uploaded");
+
     try {
-        if (!req.file) {
-            return res.status(400).json({ error: "No file uploaded" });
-        }
 
         // Read file content
-        const filePath = req.file.path;
-        console.log(filePath);
-        const fileContent = await fs.promises.readFile(filePath, 'utf-8');
+        console.log(imagePath);
+        const base64Image = fs.readFileSync(imagePath, "base64");
 
         // Prepare prompt for OpenAI
         const prompt = `Extract a list of dish names from the following restaurant menu text. 
-            Only return the dish names as a JSON array.Menu:${fileContent}`;
+            Only return the dish names as a JSON array.Menu`;
 
         // Call OpenAI API
         const client = new OpenAI();
 
         const response = await client.responses.create({
             model: "gpt-4.1",
-            input: prompt,
+            input: [
+                {
+                    role: "user",
+                    content: [
+                        { type: "input_text", text: prompt },
+                        {
+                            type: "input_image",
+                            image_url: `data:image/jpeg;base64,${base64Image}`,
+                        },
+                    ],
+                },
+            ],
         });
 
         console.log(response);
@@ -146,13 +157,13 @@ const extractMenuItems = asyncHandler(async (req, res) => {
         // Parse response
         const dishes = JSON.parse(response.output_text);
 
-        // Clean up uploaded file
-        fs.unlink(filePath, () => { });
-
         res.status(200).json(new ApiResponse(200, "Menu items extracted successfully", dishes));
     } catch (error) {
         console.error(error);
         throw new ApiError(500, "Failed to extract menu items");
+    }
+    finally {
+        fs.unlink(imagePath, () => { });
     }
 });
 
