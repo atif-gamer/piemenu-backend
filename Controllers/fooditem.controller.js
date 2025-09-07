@@ -131,7 +131,7 @@ const extractMenuItems = asyncHandler(async (req, res) => {
 
         // Prepare prompt for OpenAI
         const prompt = `Extract a list of dish names from the following restaurant menu text. 
-            Only return the dish names as a JSON array.Menu`;
+            Only return the dish array of object containing dish name, price and category`;
 
         // Call OpenAI API
         const client = new OpenAI();
@@ -152,12 +152,13 @@ const extractMenuItems = asyncHandler(async (req, res) => {
             ],
         });
 
-        console.log(response);
+        // console.log(response);
+        console.log(response.output_text);
 
         // Parse response
-        const dishes = JSON.parse(response.output_text);
+        // const dishes = JSON.parse(response.output_text);
 
-        res.status(200).json(new ApiResponse(200, "Menu items extracted successfully", dishes));
+        res.status(200).json(new ApiResponse(200, "Menu items extracted successfully", response.output_text));
     } catch (error) {
         console.error(error);
         throw new ApiError(500, "Failed to extract menu items");
