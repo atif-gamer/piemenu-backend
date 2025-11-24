@@ -14,7 +14,18 @@ const userSchema = new Schema({
     },
     password: {
         type: String,
-        required: true
+        required: function() {
+            // Password is required only if googleId is not present
+            return !this.googleId;
+        }
+    },
+    googleId: {
+        type: String,
+        unique: true,
+        sparse: true // Allows multiple null values
+    },
+    profilePicture: {
+        type: String
     },
     refreshToken: {
         type: String
@@ -46,7 +57,7 @@ userSchema.methods.generateRefreshToken = function () {
 
 userSchema.pre('save', async function (next) {
 
-    if (this.isModified('password')) {
+    if (this.isModified('password') && this.password) {
         this.password = await bcrypt.hashSync(this.password, 10);
     }
 

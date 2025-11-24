@@ -4,6 +4,7 @@ import ApiResponse from '../Utils/ApiResponse.js';
 import { User } from '../Models/User.js';
 import { Store } from '../Models/Store.js';
 import jwt from 'jsonwebtoken';
+import passport from '../config/passport.js';
 
 const generateAccessTokenAndRefreshToken = async (userId) => {
     try {
@@ -219,6 +220,111 @@ const logoutUser = asyncHandler(async (req, res) => {
     }
 })
 
+// Google OAuth Controllers
+const googleAuth = passport.authenticate('google', { 
+    scope: ['profile', 'email'],
+    session: false 
+});
+
+const googleAuthCallback = asyncHandler(async (req, res, next) => {
+    passport.authenticate('google', { session: false }, async (err, user, info) => {
+        console.log(err, user, info)
+        try {
+            if (err) {
+                throw new ApiError(500, "Authentication failed");
+            }
+
+            if (!user) {
+                throw new ApiError(401, "No user found");
+            }
+
+            // Generate tokens
+            const { accessToken, refreshToken } = await generateAccessTokenAndRefreshToken(user._id);
+
+            // Get user stores
+            const stores = await Store.find({ owner: user._id }).select("-owner");
+
+            // Remove sensitive data
+            user.password = undefined;
+            user.refreshToken = undefined;
+
+            const cookieOptions = {
+                httpOnly: true,
+                secure: true,
+                sameSite: "none"
+            };
+
+            // For web applications, redirect to frontend with tokens
+            const frontendURL = process.env.FRONTEND_URL || 'http://localhost:3000';
+            
+            res.status(200)
+                .cookie("accessToken", accessToken, cookieOptions)
+                .cookie("refreshToken", refreshToken, cookieOptions)
+                .redirect(`${frontendURL}/onboarding/callback?success=true`);
+
+        } catch (error) {
+            console.log(error);
+            const frontendURL = process.env.FRONTEND_URL || 'http://localhost:3000';
+            res.redirect(`${frontendURL}/auth/callback?success=false&error=${error.message}`);
+        }
+    })(req, res, next);
+});
+
+// Alternative: Return JSON response instead of redirect (for mobile apps or API usage)
+const googleAuthCallbackJSON = asyncHandler(async (req, res, next) => {
+    passport.authenticate('google', { session: false }, async (err, user, info) => {
+        try {
+            if (err) {
+                throw new ApiError(500, "Authentication failed");
+            }
+
+            if (!user) {
+                throw new ApiError(401, "No user found");
+            }
+
+            // Generate tokens
+            const { accessToken, refreshToken } = await generateAccessTokenAndRefreshToken(user._id);
+
+            // Get user stores
+            const stores = await Store.find({ owner: user._id }).select("-owner");
+
+            // Remove sensitive data
+            user.password = undefined;
+            user.refreshToken = undefined;
+
+            const cookieOptions = {
+                httpOnly: true,
+                secure: true,
+                sameSite: "none"
+            };
+
+            res.status(200)
+                .cookie("accessToken", accessToken, cookieOptions)
+                .cookie("refreshToken", refreshToken, cookieOptions)
+                .json(new ApiResponse(200, "User authenticated successfully", {
+                    user,
+                    stores,
+                    accessToken,
+                    refreshToken
+                }));
+
+        } catch (error) {
+            console.log(error);
+            throw new ApiError(error.statusCode || 500, error.message || "Authentication failed");
+        }
+    })(req, res, next);
+});
+
 // Forgot password
 
-export { registerUser, changePassword, updateUser, loginUser, logoutUser, refreshAccessToken }
+export { 
+    registerUser, 
+    changePassword, 
+    updateUser, 
+    loginUser, 
+    logoutUser, 
+    refreshAccessToken,
+    googleAuth,
+    googleAuthCallback,
+    googleAuthCallbackJSON
+}
