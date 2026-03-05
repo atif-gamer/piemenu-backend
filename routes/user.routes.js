@@ -11,4 +11,10 @@ router.route('/update').patch(verifyUser, userController.updateUser)
 router.route('/logout').post(verifyUser, userController.logoutUser)
 router.route('/refreshAccessToken/:storeId').post(userController.refreshAccessToken)
 
+// Google OAuth routes
+router.route('/auth/google').get(userController.googleAuth);
+router.route('/auth/google/callback').get(userController.googleAuthCallback);
+// Alternative JSON response endpoint (for mobile/API usage)
+router.route('/auth/google/callback/json').get(userController.googleAuthCallbackJSON);
+
 export default router;
